@@ -10,6 +10,7 @@ import { sanityClient, urlFor } from "../../sanity";
 import { Collection } from "../../typing";
 import Link from "next/link";
 import { BigNumber } from "ethers";
+import toast, { Toaster } from "react-hot-toast";
 
 interface Props {
   collection: Collection;
@@ -30,6 +31,7 @@ function NFTDropPage({ collection }: Props) {
 
   useEffect(() => {
     if (!nftDrop) return;
+
     const fetchPrice = async () => {
       const claimConditions = await nftDrop.claimConditions.getAll();
       setPriceInEth(claimConditions?.[0].currencyMetadata.displayValue);
@@ -58,6 +60,14 @@ function NFTDropPage({ collection }: Props) {
     const quantity = 1;
 
     setLoading(true);
+    const notification = toast.loading("Minting...", {
+      style: {
+        background: "white",
+        color: "green",
+        fontSize: "17px",
+        padding: "20px",
+      },
+    });
 
     nftDrop
       .claimTo(address, quantity)
@@ -65,17 +75,38 @@ function NFTDropPage({ collection }: Props) {
         const receipt = tx[0].receipt; // the transaction receipt
         const claimedTokenId = tx[0].id; // the id of the NFT claimed
         const claimedNFT = await tx[0].data(); // (optional) get the claimed NFT metadata
+
+        toast("HOORAY.. You Successfully Minted!!!", {
+          style: {
+            background: "green",
+            color: "white",
+            fontWeight: "bolder",
+            fontSize: "17px",
+            padding: "20px",
+          },
+        });
       })
       .catch((err) => {
         console.log(err);
+        toast.error("Whoops... Something went wrong", {
+          style: {
+            background: "red",
+            color: "white",
+            fontWeight: "bolder",
+            fontSize: "17px",
+            padding: "20px",
+          },
+        });
       })
       .finally(() => {
         setLoading(false);
+        toast.dismiss(notification);
       });
   };
 
   return (
     <div className="flex h-screen flex-col lg:grid lg:grid-cols-10 ">
+      <Toaster position="bottom-center" />
       {/* LFET */}
       <div className="lg:col-span-4 bg-gradient-to-br from-cyan-800 to-rose-500">
         <div className="flex flex-col items-center justify-center py-2 lg:min-h-screen ">
