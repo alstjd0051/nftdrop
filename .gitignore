@@ -39,4 +39,4 @@ yarn-error.log*
 .env.local
 
 # sanity
-/sanitynft
+/sanitynft/node_modules
